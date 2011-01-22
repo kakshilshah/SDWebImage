@@ -33,12 +33,36 @@
 
 - (void)cancelCurrentImageLoad
 {
+	UIProgressView *prg = (UIProgressView *)[self viewWithTag:919];
+	prg.hidden = YES;
     [[SDWebImageManager sharedManager] cancelForDelegate:self];
 }
 
 - (void)webImageManager:(SDWebImageManager *)imageManager didFinishWithImage:(UIImage *)image
 {
     self.image = image;
+	UIProgressView *prg = (UIProgressView *)[self viewWithTag:919];
+	prg.hidden = YES;
 }
+
+- (void)updateProgressView:(NSNumber *)progress {
+	if ([progress floatValue] > 0) {
+		UIProgressView *prg = nil;
+		if ([self viewWithTag:919] == nil) {
+			CGRect r = CGRectMake(10, (self.frame.size.height / 2) - 10, self.frame.size.width - 20, 30);
+			prg = [[UIProgressView alloc] initWithFrame:r];
+			prg.tag = 919;
+			prg.progressViewStyle = 101;
+			
+			[self addSubview:prg];
+			[prg release];
+		} else {
+			prg = (UIProgressView *)[self viewWithTag:919];
+		}
+		[prg setHidden:NO];
+		[prg setProgress:[progress floatValue]];
+	}
+}
+
 
 @end

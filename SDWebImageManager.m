@@ -121,8 +121,28 @@ static SDWebImageManager *instance;
 
 #pragma mark SDWebImageDownloaderDelegate
 
-- (void)imageDownloader:(SDWebImageDownloader *)downloader didFinishWithImage:(UIImage *)image
-{
+
+
+- (void)imageDownloader:(SDWebImageDownloader *)downloader didReceiveData:(NSData *)data {
+	[downloader retain];
+    // Notify all the delegates with this downloader
+    for (NSInteger idx = [downloaders count] - 1; idx >= 0; idx--)
+    {
+        SDWebImageDownloader *aDownloader = [downloaders objectAtIndex:idx];
+        if (aDownloader == downloader)
+        {
+            id<SDWebImageManagerDelegate> delegate = [delegates objectAtIndex:idx];
+            if (data && [delegate respondsToSelector:@selector(updateProgressView:)])
+            {
+				NSNumber *progress = [NSNumber numberWithFloat:(aDownloader.totalReceivedLength / aDownloader.expectedContentLength)];
+                [delegate performSelector:@selector(updateProgressView:) withObject:progress];
+            }
+			
+        }
+    }
+}
+
+- (void)imageDownloader:(SDWebImageDownloader *)downloader didFinishWithImage:(UIImage *)image {
     [downloader retain];
 
     // Notify all the delegates with this downloader
@@ -138,8 +158,6 @@ static SDWebImageManager *instance;
                 [delegate performSelector:@selector(webImageManager:didFinishWithImage:) withObject:self withObject:image];
             }
 
-            [downloaders removeObjectAtIndex:idx];
-            [delegates removeObjectAtIndex:idx];
         }
     }
 

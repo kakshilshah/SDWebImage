@@ -13,5 +13,5 @@
 @optional
 
 - (void)webImageManager:(SDWebImageManager *)imageManager didFinishWithImage:(UIImage *)image;
-
+- (void)updateProgressView:(NSNumber *)progress;
 @end
