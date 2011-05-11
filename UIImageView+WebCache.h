@@ -6,10 +6,11 @@
  * file that was distributed with this source code.
  */
 
-#import <UIKit/UIKit.h>
+#import "SDWebImageCompat.h"
 #import "SDWebImageManagerDelegate.h"
 
-#define kSDWebImageProgressView 919
+#define kSDWebImageProgressView 43919
+#define kSDWebImageProgressViewStyle 101
 
 @interface UIImageView (WebCache) <SDWebImageManagerDelegate>
 

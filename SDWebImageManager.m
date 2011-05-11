@@ -56,14 +56,24 @@ static SDWebImageManager *instance;
 
 - (void)downloadWithURL:(NSURL *)url delegate:(id<SDWebImageManagerDelegate>)delegate
 {
-    if (!url || !delegate || [failedURLs containsObject:url])
+    [self downloadWithURL: url delegate:delegate retryFailed:NO];
+}
+
+- (void)downloadWithURL:(NSURL *)url delegate:(id<SDWebImageManagerDelegate>)delegate retryFailed:(BOOL)retryFailed
+{
+    [self downloadWithURL:url delegate:delegate retryFailed:retryFailed lowPriority:NO];
+}
+
+- (void)downloadWithURL:(NSURL *)url delegate:(id<SDWebImageManagerDelegate>)delegate retryFailed:(BOOL)retryFailed lowPriority:(BOOL)lowPriority
+{
+    if (!url || !delegate || (!retryFailed && [failedURLs containsObject:url]))
     {
         return;
     }
-
+    
     // Check the on-disk cache async so we don't block the main thread
-    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:delegate, @"delegate", url, @"url", nil];
-    [[SDImageCache sharedImageCache] queryDiskCacheForKey:[url absoluteString] delegate:self userInfo:info];
+    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:delegate, @"delegate", url, @"url", [NSNumber numberWithBool:lowPriority], @"low_priority", nil];
+    [[SDImageCache sharedImageCache] queryDiskCacheForKey:[url absoluteString] delegate:self userInfo:info];    
 }
 
 - (void)cancelForDelegate:(id<SDWebImageManagerDelegate>)delegate
@@ -105,16 +115,21 @@ static SDWebImageManager *instance;
 {
     NSURL *url = [info objectForKey:@"url"];
     id<SDWebImageManagerDelegate> delegate = [info objectForKey:@"delegate"];
+    BOOL lowPriority = [[info objectForKey:@"low_priority"] boolValue];
 
     // Share the same downloader for identical URLs so we don't download the same URL several times
     SDWebImageDownloader *downloader = [downloaderForURL objectForKey:url];
 
     if (!downloader)
     {
-        downloader = [SDWebImageDownloader downloaderWithURL:url delegate:self];
+        downloader = [SDWebImageDownloader downloaderWithURL:url delegate:self userInfo:nil lowPriority:lowPriority];
         [downloaderForURL setObject:downloader forKey:url];
     }
-
+    
+    // If we get a normal priority request, make sure to change type since downloader is shared
+    if (!lowPriority && downloader.lowPriority)
+        downloader.lowPriority = NO;
+    
     [delegates addObject:delegate];
     [downloaders addObject:downloader];
 }
@@ -155,9 +170,19 @@ static SDWebImageManager *instance;
         {
             id<SDWebImageManagerDelegate> delegate = [delegates objectAtIndex:idx];
 
-            if (image && [delegate respondsToSelector:@selector(webImageManager:didFinishWithImage:)])
+            if (image)
             {
-                [delegate performSelector:@selector(webImageManager:didFinishWithImage:) withObject:self withObject:image];
+                if ([delegate respondsToSelector:@selector(webImageManager:didFinishWithImage:)])
+                {
+                    [delegate performSelector:@selector(webImageManager:didFinishWithImage:) withObject:self withObject:image];
+                }
+            }
+            else
+            {
+                if ([delegate respondsToSelector:@selector(webImageManager:didFailWithError:)])
+                {
+                    [delegate performSelector:@selector(webImageManager:didFailWithError:) withObject:self withObject:nil];
+                }
             }
 
         }
@@ -183,5 +208,31 @@ static SDWebImageManager *instance;
     [downloader release];
 }
 
+- (void)imageDownloader:(SDWebImageDownloader *)downloader didFailWithError:(NSError *)error;
+{
+    [downloader retain];
+
+    // Notify all the delegates with this downloader
+    for (NSInteger idx = [downloaders count] - 1; idx >= 0; idx--)
+    {
+        SDWebImageDownloader *aDownloader = [downloaders objectAtIndex:idx];
+        if (aDownloader == downloader)
+        {
+            id<SDWebImageManagerDelegate> delegate = [delegates objectAtIndex:idx];
+
+            if ([delegate respondsToSelector:@selector(webImageManager:didFailWithError:)])
+            {
+                [delegate performSelector:@selector(webImageManager:didFailWithError:) withObject:self withObject:error];
+            }
+
+            [downloaders removeObjectAtIndex:idx];
+            [delegates removeObjectAtIndex:idx];
+        }
+    }
+
+    // Release the downloader
+    [downloaderForURL removeObjectForKey:downloader.url];
+    [downloader release];
+}
 
 @end
