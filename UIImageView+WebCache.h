@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "SDWebImageManagerDelegate.h"
 
+#define kSDWebImageProgressView 919
+
 @interface UIImageView (WebCache) <SDWebImageManagerDelegate>
 
 - (void)setImageWithURL:(NSURL *)url;
