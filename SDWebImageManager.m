@@ -140,6 +140,8 @@ static SDWebImageManager *instance;
 			
         }
     }
+
+	[downloader release];
 }
 
 - (void)imageDownloader:(SDWebImageDownloader *)downloader didFinishWithImage:(UIImage *)image {
