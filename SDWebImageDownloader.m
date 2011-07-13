@@ -23,13 +23,13 @@ NSString *const SDWebImageDownloadStopNotification = @"SDWebImageDownloadStopNot
 
 + (id)downloaderWithURL:(NSURL *)url delegate:(id<SDWebImageDownloaderDelegate>)delegate
 {
-    return [[self class] downloaderWithURL:url delegate:delegate userInfo:nil];
+    return [self downloaderWithURL:url delegate:delegate userInfo:nil];
 }
 
 + (id)downloaderWithURL:(NSURL *)url delegate:(id<SDWebImageDownloaderDelegate>)delegate userInfo:(id)userInfo
 {
 
-    return [[self class] downloaderWithURL:url delegate:delegate userInfo:userInfo lowPriority:NO];
+    return [self downloaderWithURL:url delegate:delegate userInfo:userInfo lowPriority:NO];
 }
 
 + (id)downloaderWithURL:(NSURL *)url delegate:(id<SDWebImageDownloaderDelegate>)delegate userInfo:(id)userInfo lowPriority:(BOOL)lowPriority
@@ -46,7 +46,7 @@ NSString *const SDWebImageDownloadStopNotification = @"SDWebImageDownloadStopNot
                                                  selector:NSSelectorFromString(@"stopActivity")
                                                      name:SDWebImageDownloadStopNotification object:nil];
     }
-    
+
     SDWebImageDownloader *downloader = [[[SDWebImageDownloader alloc] init] autorelease];
     downloader.url = url;
     downloader.delegate = delegate;
@@ -122,7 +122,7 @@ NSString *const SDWebImageDownloadStopNotification = @"SDWebImageDownloadStopNot
     {
         [delegate performSelector:@selector(imageDownloaderDidFinish:) withObject:self];
     }
-    
+
     if ([delegate respondsToSelector:@selector(imageDownloader:didFinishWithImage:)])
     {
         UIImage *image = [[UIImage alloc] initWithData:imageData];
