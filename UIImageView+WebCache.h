@@ -11,6 +11,7 @@
 
 #define kSDWebImageProgressView 43919
 #define kSDWebImageProgressViewStyle 101
+#define kSDWebImageFadeInTime 0.25
 
 @interface UIImageView (WebCache) <SDWebImageManagerDelegate>
 

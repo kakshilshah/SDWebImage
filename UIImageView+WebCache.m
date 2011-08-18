@@ -42,7 +42,7 @@
 {
   [self setAlpha:0];
   [UIView beginAnimations:nil context:NULL];
-  [UIView setAnimationDuration:0.5];
+  [UIView setAnimationDuration:kSDWebImageFadeInTime];
   self.image = image;
   [self setAlpha:1];
   [UIView commitAnimations];
