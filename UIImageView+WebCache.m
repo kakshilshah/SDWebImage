@@ -40,8 +40,14 @@
 
 - (void)webImageManager:(SDWebImageManager *)imageManager didFinishWithImage:(UIImage *)image
 {
-    self.image = image;
-	UIProgressView *prg = (UIProgressView *)[self viewWithTag:kSDWebImageProgressView];
+  [self setAlpha:0];
+  [UIView beginAnimations:nil context:NULL];
+  [UIView setAnimationDuration:0.5];
+  self.image = image;
+  [self setAlpha:1];
+  [UIView commitAnimations];
+
+  UIProgressView *prg = (UIProgressView *)[self viewWithTag:kSDWebImageProgressView];
 	prg.hidden = YES;
 }
 
