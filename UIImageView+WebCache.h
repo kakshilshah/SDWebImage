@@ -10,9 +10,18 @@
 #import "SDWebImageManagerDelegate.h"
 #import "SDWebImageManager.h"
 
+#ifndef kSDWebImageProgressView
 #define kSDWebImageProgressView 43919
+#endif
+
+#ifndef kSDWebImageProgressViewStyle
 #define kSDWebImageProgressViewStyle 101
+#endif
+
+#ifndef kSDWebImageFadeInTime
 #define kSDWebImageFadeInTime 0.25
+#endif
+
 #define kSDWebImageDownloadCompleted @"kSDWebImageDownloadCompleted"
 #define kSDWebImageFadeInCompleted @"kSDWebImageFadeInCompleted"
 
