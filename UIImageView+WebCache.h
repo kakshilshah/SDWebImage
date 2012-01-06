@@ -13,6 +13,8 @@
 #define kSDWebImageProgressView 43919
 #define kSDWebImageProgressViewStyle 101
 #define kSDWebImageFadeInTime 0.25
+#define kSDWebImageDownloadCompleted @"kSDWebImageDownloadCompleted"
+#define kSDWebImageFadeInCompleted @"kSDWebImageFadeInCompleted"
 
 @interface UIImageView (WebCache) <SDWebImageManagerDelegate>
 
@@ -52,5 +54,10 @@
  * Cancel the current download
  */
 - (void)cancelCurrentImageLoad;
+
+/**
+ * Helper Method for delayed notification when the image has faded in.
+ */
+- (void)sendImageFadedInNotification:(NSNotification *)notification;
 
 @end

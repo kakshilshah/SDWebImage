@@ -51,9 +51,18 @@
   [self setAlpha:1];
   [UIView commitAnimations];
 
+  [[NSNotificationCenter defaultCenter] postNotificationName:kSDWebImageDownloadCompleted object:nil userInfo:nil];  
+  [self performSelector:@selector(sendImageFadedInNotification:) withObject:nil afterDelay:kSDWebImageFadeInTime];
+  
   UIProgressView *prg = (UIProgressView *)[self viewWithTag:kSDWebImageProgressView];
 	prg.hidden = YES;
 }
+
+- (void)sendImageFadedInNotification:(NSNotification *)notification
+{
+  [[NSNotificationCenter defaultCenter] postNotificationName:kSDWebImageFadeInCompleted object:nil userInfo:nil];    
+}
+
 
 - (void)updateProgressView:(NSNumber *)progress {
 	if ([progress floatValue] > 0) {
