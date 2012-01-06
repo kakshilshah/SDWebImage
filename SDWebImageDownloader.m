@@ -8,6 +8,12 @@
 
 #import "SDWebImageDownloader.h"
 
+#ifdef ENABLE_SDWEBIMAGE_DECODER
+#import "SDWebImageDecoder.h"
+@interface SDWebImageDownloader (ImageDecoder) <SDWebImageDecoderDelegate>
+@end
+#endif
+
 NSString *const SDWebImageDownloadStartNotification = @"SDWebImageDownloadStartNotification";
 NSString *const SDWebImageDownloadStopNotification = @"SDWebImageDownloadStopNotification";
 
@@ -125,23 +131,14 @@ NSString *const SDWebImageDownloadStopNotification = @"SDWebImageDownloadStopNot
 
     if ([delegate respondsToSelector:@selector(imageDownloader:didFinishWithImage:)])
     {
-#if NS_BLOCKS_AVAILABLE
-        if ([[[NSRunLoop currentRunLoop] currentMode] isEqualToString:UITrackingRunLoopMode]) {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^(void) {
-                UIImage *image = [[UIImage alloc] initWithData:imageData];
-                dispatch_sync(dispatch_get_main_queue(), ^(void) {
-                    [delegate performSelector:@selector(imageDownloader:didFinishWithImage:) withObject:self withObject:image];
-                });
-                [image release];
-            });
-        } else {
+        UIImage *image = [[UIImage alloc] initWithData:imageData];
+
+#ifdef ENABLE_SDWEBIMAGE_DECODER
+        [[SDWebImageDecoder sharedImageDecoder] decodeImage:image withDelegate:self userInfo:nil];
+#else
+        [delegate performSelector:@selector(imageDownloader:didFinishWithImage:) withObject:self withObject:image];
 #endif
-            UIImage *image = [[UIImage alloc] initWithData:imageData];
-            [delegate performSelector:@selector(imageDownloader:didFinishWithImage:) withObject:self withObject:image];
-            [image release];
-#if NS_BLOCKS_AVAILABLE
-        }
-#endif
+        [image release];
     }
 }
 
@@ -161,6 +158,15 @@ NSString *const SDWebImageDownloadStopNotification = @"SDWebImageDownloadStopNot
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
 	self.expectedContentLength = [response expectedContentLength];
 }
+
+#pragma mark SDWebImageDecoderDelegate
+
+#ifdef ENABLE_SDWEBIMAGE_DECODER
+- (void)imageDecoder:(SDWebImageDecoder *)decoder didFinishDecodingImage:(UIImage *)image userInfo:(NSDictionary *)userInfo
+{
+    [delegate performSelector:@selector(imageDownloader:didFinishWithImage:) withObject:self withObject:image];
+}
+#endif
 
 #pragma mark NSObject
 
