@@ -14,10 +14,6 @@
 #define kSDWebImageProgressView 43919
 #endif
 
-#ifndef kSDWebImageProgressViewStyle
-#define kSDWebImageProgressViewStyle 101
-#endif
-
 #ifndef kSDWebImageFadeInTime
 #define kSDWebImageFadeInTime 0.25
 #endif

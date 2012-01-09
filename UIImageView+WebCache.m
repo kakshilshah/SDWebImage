@@ -71,7 +71,7 @@
 			CGRect r = CGRectMake(10, (self.frame.size.height / 2) - 10, self.frame.size.width - 20, 30);
 			prg = [[UIProgressView alloc] initWithFrame:r];
 			prg.tag = kSDWebImageProgressView;
-			prg.progressViewStyle = kSDWebImageProgressViewStyle;
+			prg.progressViewStyle = UIProgressViewStyleDefault;
 			
 			[self addSubview:prg];
 			[prg release];
